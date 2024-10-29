@@ -168,10 +168,10 @@ static void update_peer_conn_params(struct connected_peer *peer)
 		/* Retry to update the connection parameters after an error. */
 		k_work_reschedule(&conn_params_update, CONN_PARAMS_ERROR_TIMEOUT);
 	} else {
-		LOG_INF("Conn params for peer: %p set: %s, latency: %"PRIu16,
-			(void *)peer->conn,
-			(IS_ENABLED(CONFIG_CAF_BLE_USE_LLPM) && peer->llpm_support) ?
-			"LLPM" : "BLE", peer->requested_latency);
+		// LOG_INF("Conn params for peer: %p set: %s, latency: %"PRIu16,
+		// 	(void *)peer->conn,
+		// 	(IS_ENABLED(CONFIG_CAF_BLE_USE_LLPM) && peer->llpm_support) ?
+		// 	"LLPM" : "BLE", peer->requested_latency);
 	}
 }
 
@@ -223,7 +223,7 @@ static void ble_peer_conn_params_event_handler(const struct ble_peer_conn_params
 
 	if (event->updated) {
 		peer->conn_param_update_pending = false;
-		LOG_INF("Conn params for peer: %p updated.", (void *)peer->conn);
+		// LOG_INF("Conn params for peer: %p updated.", (void *)peer->conn);
 	} else {
 		peer->requested_latency = event->latency;
 		LOG_INF("Request to update conn: %p latency to: %"PRIu16, event->id,

@@ -563,6 +563,8 @@ static enum state update_state_transition(enum state prev_state, enum state new_
 	size_t conn_count = count_conn();
 	size_t bond_count = count_bond();
 
+	LOG_INF("Coneection count: %d - Bond count:%d \n",conn_count,bond_count);
+
 	/* Skip forced active state if disabled in configuration. */
 	if ((new_state == STATE_FORCED_ACTIVE) && (FORCED_SCAN_DURATION_MS == 0)) {
 		new_state = STATE_ACTIVE;
