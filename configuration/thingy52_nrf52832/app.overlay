@@ -1,0 +1,72 @@
+&pinctrl {
+	pdm0_default_alt: pdm0_default_alt {
+		group1 {
+			psels = <NRF_PSEL(PDM_CLK, 0, 26)>,
+				<NRF_PSEL(PDM_DIN, 0, 25)>;
+		};
+	};
+};
+
+dmic_dev: &pdm0 {
+	status = "okay";
+	pinctrl-0 = <&pdm0_default_alt>;
+	pinctrl-names = "default";
+	clock-source = "PCLK32M_HFXO";
+};
+
+&mpu_pwr {
+    status = "okay";
+	regulator-always-on;
+};
+
+
+&i2c0 {
+	mpu9250: mpu9250@68 {
+		compatible = "invensense,mpu9250";
+		reg = <0x68>;
+		status = "okay";
+		vin-supply = <&mpu_pwr>;
+		irq-gpios = <&gpio0 6 GPIO_ACTIVE_LOW>;
+		gyro-sr-div = <10>;
+		gyro-dlpf = <92>;
+		gyro-fs = <2000>;
+		accel-fs = <2>;
+		accel-dlpf="5.05";
+	};
+};
+
+/ {
+	gpioled0 {
+		compatible = "gpio-leds";
+		status = "okay";
+		label = "LED System State";
+
+		led0_g: led_0 {
+			gpios = <&sx1509b 5 GPIO_ACTIVE_LOW>;
+			label = "Green LED 0";
+		};
+	};
+
+	gpioled1 {
+		compatible = "gpio-leds";
+		status = "okay";
+		label = "LED Peer State";
+		led1_r: led_0 {
+			gpios = <&sx1509b 7 GPIO_ACTIVE_LOW>;
+			label = "Red LED 1";
+		};
+		
+		led1_g: led_1 {
+			gpios = <&sx1509b 5 GPIO_ACTIVE_LOW>;
+			label = "Green LED 1";
+		};
+
+		led1_b: led_2 {
+			gpios = <&sx1509b 6 GPIO_ACTIVE_LOW>;
+			label = "Blue LED 1";
+		};
+	};
+	leds {
+		status = "disabled";
+	};
+};

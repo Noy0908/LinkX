@@ -644,10 +644,17 @@ static void load_identities(void)
 {
 	bt_addr_le_t addrs[CONFIG_BT_ID_MAX];
 	size_t count = ARRAY_SIZE(addrs);
+	char dev[BT_ADDR_LE_STR_LEN] = {0};
 
 	bt_id_get(addrs, &count);
 
 	LOG_INF("Device has %zu identities", count);
+	for(uint8_t i = 0; i < (count > CONFIG_BT_ID_MAX ? CONFIG_BT_ID_MAX : count); i++)
+	{
+		memset(dev, 0, sizeof(dev));
+		bt_addr_le_to_str(&addrs[i], dev, sizeof(dev));
+		LOG_INF("[DEVICE]: %s\n", dev);
+	}
 
 	/* Default identity should always exist */
 	__ASSERT_NO_MSG(count >= 1);

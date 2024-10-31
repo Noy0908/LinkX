@@ -199,6 +199,13 @@ static void conn_cnt_foreach(struct bt_conn *conn, void *data)
 	size_t *cur_cnt = data;
 
 	(*cur_cnt)++;
+	
+	struct bt_conn_info info;
+	char dev[BT_ADDR_LE_STR_LEN] = {0};
+
+	bt_conn_get_info(conn, &info);
+	bt_addr_le_to_str(info.le.remote, dev, sizeof(dev));
+	LOG_INF("[CONN_DEVICE]: %s\n", dev);
 }
 
 static size_t count_conn(void)
@@ -214,11 +221,16 @@ static size_t count_conn(void)
 static size_t count_bond(void)
 {
 	size_t i;
+	char dev[BT_ADDR_LE_STR_LEN] = {0};
 
 	for (i = 0; i < ARRAY_SIZE(subscribed_peers); i++) {
 		if (!bt_addr_le_cmp(&subscribed_peers[i].addr, BT_ADDR_LE_NONE)) {
 			break;
 		}
+		
+		memset(dev, 0, sizeof(dev));
+		bt_addr_le_to_str(&subscribed_peers[i].addr, dev, sizeof(dev));
+		LOG_INF("[BOND_DEVICE]: %s\n", dev);
 	}
 
 	return i;
