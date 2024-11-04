@@ -647,6 +647,8 @@ static bool handle_config_event(struct config_event *event)
 		return false;
 	}
 
+	LOG_INF("Recipient: %d	event->status: %d\n", event->recipient,event->status);
+
 	if (event->recipient == CFG_CHAN_RECIPIENT_LOCAL) {
 		if ((event->status == CONFIG_STATUS_INDEX_PEERS) ||
 		    (event->status == CONFIG_STATUS_GET_PEER) ||
@@ -656,6 +658,10 @@ static bool handle_config_event(struct config_event *event)
 		}
 
 		/* Do not try to forward requests for local recipient. */
+		return false;
+	}
+	else if ((event->recipient == 0x01) && (event->status == CONFIG_STATUS_GET_BOARD_NAME)) {
+		/* Do not try to forward requests for peer recipient. */
 		return false;
 	}
 

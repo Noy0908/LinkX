@@ -31,8 +31,7 @@ static void log_config_event(const struct app_event_header *aeh)
 }
 
 APP_EVENT_TYPE_DEFINE(config_event,
-		//   log_config_event,
-		 NULL,
+		  log_config_event,
 		  NULL,
 		  APP_EVENT_FLAGS_CREATE(
 			IF_ENABLED(CONFIG_DESKTOP_INIT_LOG_CONFIG_EVENT,

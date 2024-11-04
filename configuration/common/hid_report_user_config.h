@@ -11,8 +11,7 @@
 extern "C" {
 #endif
 
-// #define REPORT_SIZE_USER_CONFIG                29 /* bytes */
-#define REPORT_SIZE_USER_CONFIG                109 /* bytes */
+#define REPORT_SIZE_USER_CONFIG                29 /* bytes */
 
 
 #define REPORT_MAP_USER_CONFIG(report_id)				\
