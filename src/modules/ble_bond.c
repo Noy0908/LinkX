@@ -68,7 +68,7 @@ static void scan_request(void);
 
 static void erase_start(void);
 static void erase_adv_confirm(void);
-static void erase_confirm(void);
+static void erase_confirm(const bt_addr_le_t *addr);
 
 static const struct state_switch state_switch[] = {
 	 /* State                 Event         Next state               Callback */
@@ -104,6 +104,8 @@ static const struct state_switch state_switch[] = {
 enum ble_bond_opt {
 	BLE_BOND_OPT_PEER_ERASE,
 	BLE_BOND_OPT_PEER_SEARCH,
+	BLE_BOND_OPT_PEER_LIST,
+	BLE_BOND_OPT_PEER_DELETE,
 
 	BLE_BOND_OPT_COUNT
 };
@@ -112,6 +114,8 @@ const static char * const opt_descr[] = {
 	[BLE_BOND_OPT_PEER_ERASE] = "peer_erase",
 #ifdef CONFIG_DESKTOP_BT_CENTRAL
 	[BLE_BOND_OPT_PEER_SEARCH] = "peer_search",
+	[BLE_BOND_OPT_PEER_LIST] = "peer_list",
+	[BLE_BOND_OPT_PEER_DELETE] = "peer_delete",
 #endif /* CONFIG_DESKTOP_BT_CENTRAL */
 };
 
@@ -287,11 +291,11 @@ static void swap_bt_stack_peer_id(void)
 	}
 }
 
-static int remove_peers(uint8_t identity)
+static int remove_peers(uint8_t identity,const bt_addr_le_t *addr)
 {
 	LOG_INF("Remove peers on identity %u", identity);
 
-	int err = bt_unpair(get_bt_stack_peer_id(identity), BT_ADDR_LE_ANY);
+	int err = bt_unpair(get_bt_stack_peer_id(identity), addr);
 	if (err) {
 		LOG_ERR("Failed to remove");
 	}
@@ -333,7 +337,7 @@ static int shell_remove_peers(const struct shell *shell, size_t argc,
 
 	if ((state != STATE_DONGLE) && (state != STATE_DONGLE_STANDBY) &&
 	(state != STATE_DONGLE_ERASE_PEER) && (state != STATE_DONGLE_ERASE_ADV)) {
-		err = remove_peers(cur_ble_peer_id);
+		err = remove_peers(cur_ble_peer_id, BT_ADDR_LE_ANY);
 	} else {
 		shell_print(shell,
 					"Failed to remove peers. Change to other state from dongle state.");
@@ -485,11 +489,11 @@ static void erase_start(void)
 	APP_EVENT_SUBMIT(event);
 }
 
-static void erase_confirm(void)
+static void erase_confirm(const bt_addr_le_t *addr)
 {
 	__ASSERT_NO_MSG(IS_ENABLED(CONFIG_DESKTOP_BT_CENTRAL));
 
-	remove_peers(BT_ID_DEFAULT);
+	remove_peers(BT_ID_DEFAULT, addr);
 
 	struct ble_peer_operation_event *event = new_ble_peer_operation_event();
 
@@ -1001,7 +1005,14 @@ static void config_set(const uint8_t opt_id, const uint8_t *data, const size_t s
 			k_work_reschedule(&timeout, ERASE_ADV_TIMEOUT);
 
 		} else if (IS_ENABLED(CONFIG_DESKTOP_BT_CENTRAL)) {
-			erase_confirm();
+			erase_confirm(BT_ADDR_LE_ANY);
+		}
+		break;
+
+	case BLE_BOND_OPT_PEER_DELETE:
+		LOG_INF("Remote peer delete[data] request");
+		if (IS_ENABLED(CONFIG_DESKTOP_BT_CENTRAL)) {
+			erase_confirm((bt_addr_le_t *)data);
 		}
 		break;
 
@@ -1011,9 +1022,19 @@ static void config_set(const uint8_t opt_id, const uint8_t *data, const size_t s
 	};
 }
 
+extern void fetch_bond_peers(uint8_t *data, size_t *size);
 static void config_fetch(const uint8_t opt_id, uint8_t *data, size_t *size)
 {
-	LOG_WRN("Config fetch is not supported");
+	LOG_WRN("BLE_BOND_OPT_PEER_LIST: %" PRIu8, opt_id);
+	switch (opt_id) {
+	case BLE_BOND_OPT_PEER_LIST:
+		fetch_bond_peers(data, size);
+		break;
+
+	default:
+		LOG_WRN("Unknown config get: %" PRIu8, opt_id);
+		break;
+	}
 }
 
 static bool handle_power_down_event(const struct power_down_event *event)

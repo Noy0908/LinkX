@@ -59,10 +59,10 @@ struct subscriber_data {
 struct subscribed_peer {
 	bt_addr_le_t addr;
 	enum peer_type peer_type;
+	uint8_t hwid[HWID_LEN];
 	bool llpm_support;
 };
 
-static struct subscribed_peer subscribed_peers[CONFIG_BT_MAX_PAIRED];
 
 static struct bt_conn *discovering_peer_conn;
 static unsigned int scan_start_counter;
@@ -71,6 +71,9 @@ static bool peers_only = !IS_ENABLED(CONFIG_DESKTOP_BLE_NEW_PEER_SCAN_ON_BOOT);
 static bool scanning;
 
 static enum state state;
+
+
+struct subscribed_peer subscribed_peers[CONFIG_BT_MAX_PAIRED];
 
 
 static void store_subscribed_peers(void)
@@ -92,6 +95,7 @@ static void reset_subscribers(bool settings_store)
 
 		bt_addr_le_copy(&sub->addr, BT_ADDR_LE_NONE);
 		sub->peer_type = PEER_TYPE_COUNT;
+		memcpy(sub->hwid, 0x0, HWID_LEN);
 		sub->llpm_support = false;
 	}
 
@@ -116,6 +120,7 @@ static void add_subscriber(const struct ble_discovery_complete_event *event)
 		/* Save data about new subscriber. */
 		if (!bt_addr_le_cmp(&sub->addr, BT_ADDR_LE_NONE)) {
 			bt_addr_le_copy(&sub->addr, peer_addr);
+			memcpy(sub->hwid, event->hwid, HWID_LEN);
 			sub->peer_type = event->peer_type;
 			sub->llpm_support = event->peer_llpm_support;
 
@@ -929,6 +934,7 @@ static bool handle_ble_discovery_complete_event(const struct ble_discovery_compl
 	return false;
 }
 
+
 static bool handle_power_down_event(const struct power_down_event *event)
 {
 	switch (state) {
@@ -976,6 +982,30 @@ static bool handle_wake_up_event(const struct wake_up_event *event)
 	}
 
 	return false;
+}
+
+
+void fetch_bond_peers(uint8_t *data, size_t *size)
+{
+	size_t i;
+	size_t pos = 0;
+
+	for (i = 0; i < ARRAY_SIZE(subscribed_peers); i++) {
+		if (!bt_addr_le_cmp(&subscribed_peers[i].addr, BT_ADDR_LE_NONE)) {
+			break;
+		}
+
+		memcpy(&data[pos], subscribed_peers[i].addr.a.val, sizeof(subscribed_peers[i].addr.a.val));
+		pos += sizeof(subscribed_peers[i].addr.a.val);
+
+		memcpy(&data[pos], subscribed_peers[i].hwid, sizeof(subscribed_peers[i].hwid));
+		pos += sizeof(subscribed_peers[i].hwid);
+
+		data[pos] = subscribed_peers[i].peer_type;
+		pos += sizeof(subscribed_peers[i].peer_type);
+	}
+
+	*size = pos;
 }
 
 static bool app_event_handler(const struct app_event_header *aeh)
