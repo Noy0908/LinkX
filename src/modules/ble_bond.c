@@ -1022,19 +1022,42 @@ static void config_set(const uint8_t opt_id, const uint8_t *data, const size_t s
 	};
 }
 
-extern void fetch_bond_peers(uint8_t *data, size_t *size);
+
+// extern void fetch_bond_peers(uint8_t *data, size_t *size);
+// static void config_fetch(const uint8_t opt_id, uint8_t *data, size_t *size)
+// {
+// 	LOG_WRN("BLE_BOND_OPT_PEER_LIST: %" PRIu8, opt_id);
+// 	switch (opt_id) {
+// 	case BLE_BOND_OPT_PEER_LIST:
+// 		fetch_bond_peers(data, size);
+// 		break;
+
+// 	default:
+// 		LOG_WRN("Unknown config get: %" PRIu8, opt_id);
+// 		break;
+// 	}
+// }
+
 static void config_fetch(const uint8_t opt_id, uint8_t *data, size_t *size)
 {
-	LOG_WRN("BLE_BOND_OPT_PEER_LIST: %" PRIu8, opt_id);
-	switch (opt_id) {
-	case BLE_BOND_OPT_PEER_LIST:
-		fetch_bond_peers(data, size);
-		break;
+	if (IS_ENABLED(CONFIG_DESKTOP_BT_CENTRAL)) 
+	{
+		extern void fetch_bond_peers(uint8_t *data, size_t *size);
+		LOG_WRN("BLE_BOND_OPT_PEER_LIST: %" PRIu8, opt_id);
+		switch (opt_id) {
+		case BLE_BOND_OPT_PEER_LIST:
+			fetch_bond_peers(data, size);
+			break;
 
-	default:
-		LOG_WRN("Unknown config get: %" PRIu8, opt_id);
-		break;
+		default:
+			LOG_WRN("Unknown config get: %" PRIu8, opt_id);
+			break;
+		}
 	}
+	else
+	{
+		LOG_WRN("Unknown config get: %" PRIu8, opt_id);
+	}	
 }
 
 static bool handle_power_down_event(const struct power_down_event *event)
