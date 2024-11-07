@@ -68,7 +68,8 @@ static void scan_request(void);
 
 static void erase_start(void);
 static void erase_adv_confirm(void);
-static void erase_confirm(const bt_addr_le_t *addr);
+static void erase_confirm(void);
+static void delete_bond_peer(const bt_addr_le_t *addr);
 
 static const struct state_switch state_switch[] = {
 	 /* State                 Event         Next state               Callback */
@@ -489,7 +490,23 @@ static void erase_start(void)
 	APP_EVENT_SUBMIT(event);
 }
 
-static void erase_confirm(const bt_addr_le_t *addr)
+static void erase_confirm(void)
+{
+	__ASSERT_NO_MSG(IS_ENABLED(CONFIG_DESKTOP_BT_CENTRAL));
+
+	remove_peers(BT_ID_DEFAULT, BT_ADDR_LE_ANY);
+
+	struct ble_peer_operation_event *event = new_ble_peer_operation_event();
+
+	event->op = PEER_OPERATION_ERASED;
+	event->bt_app_id = get_app_id();
+	event->bt_stack_id = get_bt_stack_peer_id(get_app_id());
+
+	APP_EVENT_SUBMIT(event);
+}
+
+
+static void delete_bond_peer(const bt_addr_le_t *addr)
 {
 	__ASSERT_NO_MSG(IS_ENABLED(CONFIG_DESKTOP_BT_CENTRAL));
 
@@ -497,7 +514,8 @@ static void erase_confirm(const bt_addr_le_t *addr)
 
 	struct ble_peer_operation_event *event = new_ble_peer_operation_event();
 
-	event->op = PEER_OPERATION_ERASED;
+	// event->op = PEER_OPERATION_ERASED;
+	// event->op = PEER_OPERATION_deleted;
 	event->bt_app_id = get_app_id();
 	event->bt_stack_id = get_bt_stack_peer_id(get_app_id());
 
@@ -1005,14 +1023,14 @@ static void config_set(const uint8_t opt_id, const uint8_t *data, const size_t s
 			k_work_reschedule(&timeout, ERASE_ADV_TIMEOUT);
 
 		} else if (IS_ENABLED(CONFIG_DESKTOP_BT_CENTRAL)) {
-			erase_confirm(BT_ADDR_LE_ANY);
+			erase_confirm();
 		}
 		break;
 
 	case BLE_BOND_OPT_PEER_DELETE:
 		LOG_INF("Remote peer delete[data] request");
 		if (IS_ENABLED(CONFIG_DESKTOP_BT_CENTRAL)) {
-			erase_confirm((bt_addr_le_t *)data);
+			delete_bond_peer((bt_addr_le_t *)data);
 		}
 		break;
 
