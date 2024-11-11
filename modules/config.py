@@ -31,9 +31,9 @@ class ConfigParser:
         else:
             self.formatter = lambda x: x
 
-        print("fetch data is : " ,codecs.encode(fetched_data[:-1], 'hex'))
-        mac = codecs.encode(fetched_data[:-1], 'hex').decode('utf-8')
-        print("fetch data is:",(":".join(mac[e:e+2] for e in range(0,11,2))))
+        # print("fetch data is : " ,codecs.encode(fetched_data[:-1], 'hex'))
+        # mac = codecs.encode(fetched_data[:-1], 'hex').decode('utf-8')
+        # print("fetch data is:",(":".join(mac[e:e+2] for e in range(0,11,2))))
         
         vals = struct.unpack(self.fmt, fetched_data)
         if len(member_names) != len(vals):
@@ -115,9 +115,9 @@ def change_config(dev, module_name, option_name, value, option_descr):
 
 
 def fetch_config(dev, module_name, option_name, option_descr):
-    print('Fetch the current value of {}/{} from the firmware'.format(module_name,
-                                                                              option_name))
-
+    if option_name != "peer_list" :
+        print('Fetch the current value of {}/{} from the firmware'.format(module_name,
+                                                                                option_name))
     option_name_on_device = option_descr.option_name
     success, fetched_data = dev.config_get(module_name, option_name_on_device)
 

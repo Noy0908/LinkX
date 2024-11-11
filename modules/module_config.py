@@ -57,13 +57,23 @@ BLE_BOND_OPTIONS = {
 # Formatting details for BOND, which uses a struct containing multiple configuration values:
 # OPTION_ID: (format：6 bytes mac + 8 bytes Hardware ID + 1 byte Type)
 # BLE_BOND_OPTIONS_FORMAT = {
-#     'peer_list' : ('<6s8sB', ['peer_list'], lambda x: ':'.join('{:02X}'.format(b) for b in x), lambda x: '{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}'.format(x[7],x[6],x[5],x[4],x[3],x[2],x[1],x[0])),
+#     'peer_list': ('<15s',  ['peer_list'],  lambda x: {':'.join('{:02X}'.format(b) for b in x[0:6][::-1]), ''.join('{:02X}'.format(b) for b in x[6:14][::-1]), 'keyboard' if x[14] == 1 else 'mouse' if x[14] == 0 else 'Unknown'}, None ),
 #     'param_dongle' : ('<hhh', ['peer_erase', 'peer_search', 'peer_delete'], None, None),
 # }
+
 BLE_BOND_OPTIONS_FORMAT = {
-    'peer_list': ('<15s',  ['peer_list'],  lambda x: {':'.join('{:02X}'.format(b) for b in x[0:6][::-1]), ''.join('{:02X}'.format(b) for b in x[6:14][::-1]), 'keyboard' if x[14] == 1 else 'mouse' if x[14] == 0 else 'Unknown'}, None ),
-    'param_dongle' : ('<hhh', ['peer_erase', 'peer_search', 'peer_delete'], None, None),
+    'peer_list': (
+        '<15s',  
+        ['peer_list'],  
+        lambda x: {
+            'type': {1: 'keyboard', 0: 'mouse'}.get(x[14], 'unknown'),
+            'mac': ':'.join('{:02X}'.format(b) for b in x[0:6][::-1]),  
+            'hwid': ''.join('{:02X}'.format(b) for b in x[6:14][::-1])
+        },  
+        None  
+    )
 }
+
 
 
 FACTORY_RESET_OPTIONS = {

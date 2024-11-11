@@ -122,12 +122,25 @@ def perform_config(dev, args):
     value_type = option_config.type
 
     if value_type is not None and args.value is None:
-        success, val = fetch_config(dev, module_name, option_name, option_config)
-
-        if success:
-            print('Fetched {} {}: {}'.format(module_name, option_name, val))
+        if module_name == "ble_bond" and option_name == "peer_list" :
+            print('Fetched {} {}: '.format(module_name, option_name))
+            # bond_count = 0
+            while True:
+                success, val = fetch_config(dev, module_name, option_name, option_config)
+                if not success or not val:
+                    break
+                else:
+                    # print('Fetched {} {}: {}'.format(module_name, option_name, val))
+                    print(val)
+                    # bond_count += 1
+                    # if(bond_count >= 2):  
+                    #     break
         else:
-            print('Failed to fetch {} {}'.format(module_name, option_name))
+            success, val = fetch_config(dev, module_name, option_name, option_config)
+            if success:
+                print('Fetched {} {}: {}'.format(module_name, option_name, val))
+            else:
+                print('Failed to fetch {} {}'.format(module_name, option_name))
     else:
         if value_type is None:
             value = None
