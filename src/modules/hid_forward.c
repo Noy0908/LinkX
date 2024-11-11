@@ -647,7 +647,7 @@ static bool handle_config_event(struct config_event *event)
 		return false;
 	}
 
-	LOG_INF("Recipient: %d	event->status: %d\n", event->recipient,event->status);
+	// LOG_INF("Recipient: %d	event->status: %d\n", event->recipient,event->status);
 
 	if (event->recipient == CFG_CHAN_RECIPIENT_LOCAL) {
 		if ((event->status == CONFIG_STATUS_INDEX_PEERS) ||

@@ -987,25 +987,27 @@ static bool handle_wake_up_event(const struct wake_up_event *event)
 
 void fetch_bond_peers(uint8_t *data, size_t *size)
 {
-	size_t i;
+	static uint8_t index = 0;
 	size_t pos = 0;
-
-	for (i = 0; i < ARRAY_SIZE(subscribed_peers); i++) {
-		if (!bt_addr_le_cmp(&subscribed_peers[i].addr, BT_ADDR_LE_NONE)) {
-			break;
-		}
-
-		memcpy(&data[pos], subscribed_peers[i].addr.a.val, sizeof(subscribed_peers[i].addr.a.val));
-		pos += sizeof(subscribed_peers[i].addr.a.val);
-
-		memcpy(&data[pos], subscribed_peers[i].hwid, sizeof(subscribed_peers[i].hwid));
-		pos += sizeof(subscribed_peers[i].hwid);
-
-		data[pos] = subscribed_peers[i].peer_type;
-		pos += sizeof(subscribed_peers[i].peer_type);
+	
+	if (!bt_addr_le_cmp(&subscribed_peers[index].addr, BT_ADDR_LE_NONE) ||
+		index >= CONFIG_DESKTOP_HID_DONGLE_BOND_COUNT) 
+	{
+		index = 0;
+		return;
 	}
 
+	memcpy(&data[pos], subscribed_peers[index].addr.a.val, sizeof(subscribed_peers[index].addr.a.val));
+	pos += sizeof(subscribed_peers[index].addr.a.val);
+
+	memcpy(&data[pos], subscribed_peers[index].hwid, sizeof(subscribed_peers[index].hwid));
+	pos += sizeof(subscribed_peers[index].hwid);
+
+	data[pos] = subscribed_peers[index].peer_type;
+	pos += sizeof(subscribed_peers[index].peer_type);
+
 	*size = pos;
+	index++;
 }
 
 static bool app_event_handler(const struct app_event_header *aeh)

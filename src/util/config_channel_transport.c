@@ -81,7 +81,7 @@ int config_channel_report_parse(const uint8_t *buffer, size_t length,
 
 	__ASSERT_NO_MSG(pos == TRANSPORT_HEADER_SIZE);
 
-	LOG_INF("event->recipient:%d	event->status:%d", event->recipient, event->status);
+	// LOG_INF("event->recipient:%d	event->status:%d", event->recipient, event->status);
 
 	err = data_len_check(config_data_len);
 	if (err) {
