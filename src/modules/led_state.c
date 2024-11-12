@@ -137,10 +137,13 @@ static bool app_event_handler(const struct app_event_header *aeh)
 		struct ble_peer_operation_event *event =
 			cast_ble_peer_operation_event(aeh);
 
-		cur_peer_id = event->bt_app_id;
-		peer_op = event->op;
-		load_peer_state_led();
-
+		if(event->bt_app_id < 0x7f)
+		{
+			cur_peer_id = event->bt_app_id;
+			peer_op = event->op;
+			load_peer_state_led();
+		}
+			
 		return false;
 	}
 

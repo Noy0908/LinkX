@@ -1254,7 +1254,7 @@ static bool app_event_handler(const struct app_event_header *aeh)
 		const struct ble_peer_operation_event *event =
 			cast_ble_peer_operation_event(aeh);
 
-		if (event->op == PEER_OPERATION_ERASED) {
+		if ((event->op == PEER_OPERATION_ERASED) && (event->bt_app_id < 0x7f)) {
 			reset_peripheral_address();
 			store_peripheral_address();
 		}

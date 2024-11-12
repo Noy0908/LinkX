@@ -104,6 +104,32 @@ static void reset_subscribers(bool settings_store)
 	}
 }
 
+
+static void delete_subscribers(uint8_t index, bool settings_store)
+{
+	for (size_t i = index; i < ARRAY_SIZE(subscribed_peers) - 1; i++) 
+	{
+		if (!bt_addr_le_cmp(&subscribed_peers[i+1].addr, BT_ADDR_LE_NONE))
+		{
+			subscribed_peers[i] = subscribed_peers[i+1];
+		}
+		else
+		{
+			struct subscribed_peer *sub = &subscribed_peers[i+1];
+
+			bt_addr_le_copy(&sub->addr, BT_ADDR_LE_NONE);
+			sub->peer_type = PEER_TYPE_COUNT;
+			memcpy(sub->hwid, 0x0, HWID_LEN);
+			sub->llpm_support = false;
+			break;
+		}
+	}
+
+	if (settings_store) {
+		store_subscribed_peers();
+	}
+}
+
 static void add_subscriber(const struct ble_discovery_complete_event *event)
 {
 	const bt_addr_le_t *peer_addr = bt_conn_get_dst(bt_gatt_dm_conn_get(event->dm));
@@ -884,9 +910,18 @@ static bool handle_ble_peer_operation_event(const struct ble_peer_operation_even
 {
 	switch (event->op) {
 	case PEER_OPERATION_ERASED:
-		reset_subscribers(true);
-		/* Fall-through */
-
+		if(event->bt_app_id >= 0x7f)		//delete the specify device id
+		{
+			uint8_t index = event->bt_app_id - 0x7f -1;
+			delete_subscribers(index, true);
+			break;
+		}
+		else 
+		{
+			reset_subscribers(true);
+			/* Fall-through */
+		}
+		
 	case PEER_OPERATION_SCAN_REQUEST:
 		if (IS_ENABLED(CONFIG_BT_SCAN_CONN_ATTEMPTS_FILTER)) {
 			bt_scan_conn_attempts_filter_clear();
@@ -985,6 +1020,20 @@ static bool handle_wake_up_event(const struct wake_up_event *event)
 }
 
 
+bt_addr_le_t *get_addr_from_id(uint8_t id)
+{
+	char dev[BT_ADDR_LE_STR_LEN] = {0};
+	if (!bt_addr_le_cmp(&subscribed_peers[id].addr, BT_ADDR_LE_NONE)) {
+		return NULL;
+	}
+	
+	memset(dev, 0, sizeof(dev));
+	bt_addr_le_to_str(&subscribed_peers[id].addr, dev, sizeof(dev));
+	LOG_INF("delete device MAC is: %s\n", dev);
+	
+	return &subscribed_peers[id].addr;
+}
+
 void fetch_bond_peers(uint8_t *data, size_t *size)
 {
 	static uint8_t index = 0;
@@ -1005,6 +1054,9 @@ void fetch_bond_peers(uint8_t *data, size_t *size)
 
 	data[pos] = subscribed_peers[index].peer_type;
 	pos += sizeof(subscribed_peers[index].peer_type);
+
+	data[pos] = index;
+	pos += sizeof(index);
 
 	*size = pos;
 	index++;
