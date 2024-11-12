@@ -52,7 +52,7 @@ BLE_BOND_OPTIONS = {
     'peer_erase':             ConfigOption(None, 'peer_erase',  'Trigger peer erase', None),
     'peer_search':            ConfigOption(None, 'peer_search', 'Trigger peer search', None),
     'peer_list':              ConfigOption(None, 'peer_list',   'List all the bond peers', str),
-    'peer_delete':            ConfigOption(('0',      '0x1FFFFFFFFF'), 'peer_delete', 'delete the bond peer with specified mac', str),
+    'peer_delete':            ConfigOption((1, 7), 'peer_delete', 'delete the bond peer with specified ID', int),
 }
 # Formatting details for BOND, which uses a struct containing multiple configuration values:
 # OPTION_ID: (format：6 bytes mac + 8 bytes Hardware ID + 1 byte Type)
@@ -63,15 +63,23 @@ BLE_BOND_OPTIONS = {
 
 BLE_BOND_OPTIONS_FORMAT = {
     'peer_list': (
-        '<15s',  
+        '<16s',  
         ['peer_list'],  
         lambda x: {
+            'ID':  '{}'.format(x[15]+1),
             'type': {1: 'keyboard', 0: 'mouse'}.get(x[14], 'unknown'),
             'mac': ':'.join('{:02X}'.format(b) for b in x[0:6][::-1]),  
             'hwid': ''.join('{:02X}'.format(b) for b in x[6:14][::-1])
         },  
         None  
-    )
+    ),
+    'param_dongle' : ('<hhh', ['peer_erase', 'peer_search', 'peer_delete'], None, None),
+    # 'peer_delete': (
+    #     '<6s',  
+    #     ['peer_delete'],  
+    #     lambda x: ':'.join('{:02X}'.format(b) for b in x[::-1]),  
+    #     lambda x: bytes.fromhex(x.replace(':', ''))  
+    # )
 }
 
 

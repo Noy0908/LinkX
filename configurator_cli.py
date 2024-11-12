@@ -124,17 +124,12 @@ def perform_config(dev, args):
     if value_type is not None and args.value is None:
         if module_name == "ble_bond" and option_name == "peer_list" :
             print('Fetched {} {}: '.format(module_name, option_name))
-            # bond_count = 0
             while True:
                 success, val = fetch_config(dev, module_name, option_name, option_config)
                 if not success or not val:
                     break
                 else:
-                    # print('Fetched {} {}: {}'.format(module_name, option_name, val))
                     print(val)
-                    # bond_count += 1
-                    # if(bond_count >= 2):  
-                    #     break
         else:
             success, val = fetch_config(dev, module_name, option_name, option_config)
             if success:

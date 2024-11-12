@@ -31,6 +31,8 @@ class ConfigParser:
         else:
             self.formatter = lambda x: x
 
+        
+        # print("fetch data is : " ,fetched_data)
         # print("fetch data is : " ,codecs.encode(fetched_data[:-1], 'hex'))
         # mac = codecs.encode(fetched_data[:-1], 'hex').decode('utf-8')
         # print("fetch data is:",(":".join(mac[e:e+2] for e in range(0,11,2))))
@@ -72,7 +74,7 @@ def get_option_format(module_name, option_name_on_device):
 
 def change_config(dev, module_name, option_name, value, option_descr):
     value_range = option_descr.range
-    logging.debug('Send request to update {}/{}: {}'.format(module_name,
+    print('Send request to update {}/{}: {}'.format(module_name,
                                                             option_name,
                                                             value))
 
