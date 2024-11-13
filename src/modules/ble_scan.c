@@ -104,26 +104,28 @@ static void reset_subscribers(bool settings_store)
 	}
 }
 
-
+// static size_t count_bond(void);
 static void delete_subscribers(uint8_t index, bool settings_store)
 {
-	for (size_t i = index; i < ARRAY_SIZE(subscribed_peers) - 1; i++) 
+	uint8_t i = 0;
+	for (i = index; i < ARRAY_SIZE(subscribed_peers) - 1; i++) 
 	{
 		if (!bt_addr_le_cmp(&subscribed_peers[i+1].addr, BT_ADDR_LE_NONE))
 		{
-			subscribed_peers[i] = subscribed_peers[i+1];
+			break;
 		}
 		else
 		{
-			struct subscribed_peer *sub = &subscribed_peers[i+1];
-
-			bt_addr_le_copy(&sub->addr, BT_ADDR_LE_NONE);
-			sub->peer_type = PEER_TYPE_COUNT;
-			memcpy(sub->hwid, 0x0, HWID_LEN);
-			sub->llpm_support = false;
-			break;
+			subscribed_peers[i] = subscribed_peers[i+1];
 		}
 	}
+
+	struct subscribed_peer *sub = &subscribed_peers[i];
+	bt_addr_le_copy(&sub->addr, BT_ADDR_LE_NONE);
+	sub->peer_type = PEER_TYPE_COUNT;
+	memcpy(sub->hwid, 0x0, HWID_LEN);
+	sub->llpm_support = false;
+	// count_bond();
 
 	if (settings_store) {
 		store_subscribed_peers();

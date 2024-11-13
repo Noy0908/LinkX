@@ -302,6 +302,7 @@ static int register_peripheral(struct bt_gatt_dm *dm, const uint8_t *hwid,
 			}
 		}
 	}
+	LOG_INF("sub_id = %d array_size=%d\n", sub_id, ARRAY_SIZE(subscribers));
 	__ASSERT_NO_MSG(sub_id < ARRAY_SIZE(subscribers));
 
 	size_t per_id;
@@ -572,43 +573,6 @@ static void handle_config_channel_peers_req(const struct config_event *event)
 		APP_EVENT_SUBMIT(rsp);
 		break;
 	}
-
-	// case CONFIG_STATUS_GET_BOND_PEER:
-	// {
-	// 	size_t i;
-	// 	char dev[BT_ADDR_LE_STR_LEN] = {0};
-
-	// 	for (i = 0; i < ARRAY_SIZE(subscribed_peers); i++) {
-	// 		if (!bt_addr_le_cmp(&subscribed_peers[i].addr, BT_ADDR_LE_NONE)) {
-	// 			break;
-	// 		}
-			
-	// 		memset(dev, 0, sizeof(dev));
-	// 		bt_addr_le_to_str(&subscribed_peers[i].addr, dev, sizeof(dev));
-	// 		LOG_INF("[BOND_DEVICE]: %s\n", dev);
-	// 	}
-
-
-	// 	struct config_event *rsp = generate_response(event,
-	// 					    HWID_LEN + sizeof(uint8_t));
-	// 	size_t pos = 0;
-
-	// 	if (per) {
-	// 		memcpy(&rsp->dyndata.data[pos],
-	// 		       per->hwid, sizeof(per->hwid));
-	// 		pos += sizeof(per->hwid);
-
-	// 		rsp->dyndata.data[pos] = per->cfg_chan_id;
-	// 	} else {
-	// 		pos += HWID_LEN;
-
-	// 		rsp->dyndata.data[pos] = CFG_CHAN_UNUSED_PEER_ID;
-	// 	}
-
-	// 	rsp->status = CONFIG_STATUS_SUCCESS;
-	// 	APP_EVENT_SUBMIT(rsp);
-	// 	break;
-	// }
 
 	case CONFIG_STATUS_GET_PEERS_CACHE:
 	{
