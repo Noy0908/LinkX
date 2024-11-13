@@ -81,6 +81,30 @@ config DESKTOP_BLE_SCAN_PM_EVENTS
 	  Stop and block scanning for peers if the central switched to the power down mode
 	  to reduce power consumption.
 
+
+config DESKTOP_SCAN_AND_PAIR_ONLY_ONE
+   bool "stop scanning for new pairs as soon as a new one is paired"
+   default n
+   help
+     when enabled, when scanning for new pairs, it will stop scanning for new pairs after 
+     finding just ONE pair. Scanning will go back to scanning only for bonded devices.
+     To scan for new pair again, use dongle button or peer_search in config channel.
+     when disabled, it will keep scanning for new pairs until max number of allowed connection is reached or 
+     any of the scanning timeout/interruption takes place
+ 
+config DESKTOP_SCAN_WINDOW
+   int "scanning window"
+   default 48
+   help
+     Custom scan window in units (one unit is 0.625ms; 30ms is 48 units i.e. 0x0030) 
+     
+config DESKTOP_SCAN_INTERVAL
+   int "scanning interval"
+   default 96
+   help
+     Custom scan window in units (one unit is 0.625ms; 60ms is 96 units i.e 0x0060)
+ 
+
 module = DESKTOP_BLE_SCAN
 module-str = BLE scan
 source "subsys/logging/Kconfig.template.log_config"

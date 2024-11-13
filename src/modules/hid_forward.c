@@ -142,6 +142,17 @@ static void reset_peripheral_address(void)
 	}
 }
 
+static void remove_peripheral_address(bt_addr_le_t *addr)
+{
+	for (size_t i = 0; i < ARRAY_SIZE(peripheral_address); i++) {
+		if (!bt_addr_le_cmp(&peripheral_address[i], addr))
+		{
+			bt_addr_le_copy(&peripheral_address[i], BT_ADDR_LE_NONE);
+			break;
+		}
+	}
+}
+
 static struct subscriber *get_subscriber(const struct hids_peripheral *per)
 {
 	__ASSERT_NO_MSG(per->sub_id < ARRAY_SIZE(subscribers));
@@ -1218,8 +1229,20 @@ static bool app_event_handler(const struct app_event_header *aeh)
 		const struct ble_peer_operation_event *event =
 			cast_ble_peer_operation_event(aeh);
 
-		if ((event->op == PEER_OPERATION_ERASED) && (event->bt_app_id < 0x7f)) {
-			reset_peripheral_address();
+		if (event->op == PEER_OPERATION_ERASED)
+		{
+		 	if (event->bt_app_id < 0x7f) 
+			{
+				reset_peripheral_address();
+			}
+			else
+			{
+				extern bt_addr_le_t *get_addr_from_id(uint8_t id);
+				
+				bt_addr_le_t *addr = get_addr_from_id(event->bt_app_id);
+				remove_peripheral_address(addr);
+			}
+			
 			store_peripheral_address();
 		}
 
