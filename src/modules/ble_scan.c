@@ -74,6 +74,7 @@ static enum state state;
 
 
 struct subscribed_peer subscribed_peers[CONFIG_BT_MAX_PAIRED];
+bt_addr_le_t delete_peer;
 
 
 static void store_subscribed_peers(void)
@@ -233,12 +234,12 @@ static void conn_cnt_foreach(struct bt_conn *conn, void *data)
 
 	(*cur_cnt)++;
 	
-	struct bt_conn_info info;
-	char dev[BT_ADDR_LE_STR_LEN] = {0};
+	// struct bt_conn_info info;
+	// char dev[BT_ADDR_LE_STR_LEN] = {0};
 
-	bt_conn_get_info(conn, &info);
-	bt_addr_le_to_str(info.le.remote, dev, sizeof(dev));
-	LOG_INF("[CONN_DEVICE]: %s\n", dev);
+	// bt_conn_get_info(conn, &info);
+	// bt_addr_le_to_str(info.le.remote, dev, sizeof(dev));
+	// LOG_INF("[CONN_DEVICE]: %s\n", dev);
 }
 
 static size_t count_conn(void)
@@ -254,16 +255,16 @@ static size_t count_conn(void)
 static size_t count_bond(void)
 {
 	size_t i;
-	char dev[BT_ADDR_LE_STR_LEN] = {0};
+	// char dev[BT_ADDR_LE_STR_LEN] = {0};
 
 	for (i = 0; i < ARRAY_SIZE(subscribed_peers); i++) {
 		if (!bt_addr_le_cmp(&subscribed_peers[i].addr, BT_ADDR_LE_NONE)) {
 			break;
 		}
 		
-		memset(dev, 0, sizeof(dev));
-		bt_addr_le_to_str(&subscribed_peers[i].addr, dev, sizeof(dev));
-		LOG_INF("[BOND_DEVICE]: %s\n", dev);
+		// memset(dev, 0, sizeof(dev));
+		// bt_addr_le_to_str(&subscribed_peers[i].addr, dev, sizeof(dev));
+		// LOG_INF("[BOND_DEVICE]: %s\n", dev);
 	}
 
 	return i;
@@ -1029,11 +1030,16 @@ bt_addr_le_t *get_addr_from_id(uint8_t id)
 		return NULL;
 	}
 	
-	memset(dev, 0, sizeof(dev));
-	bt_addr_le_to_str(&subscribed_peers[id].addr, dev, sizeof(dev));
-	LOG_INF("delete device MAC is: %s\n", dev);
+	if(id < ARRAY_SIZE(subscribed_peers))
+	{
+		delete_peer = subscribed_peers[id].addr;
+	}
 	
-	return &subscribed_peers[id].addr;
+	memset(dev, 0, sizeof(dev));
+	bt_addr_le_to_str(&delete_peer, dev, sizeof(dev));
+	LOG_INF("delete device MAC is: %s\n", dev);
+
+	return &delete_peer;
 }
 
 void fetch_bond_peers(uint8_t *data, size_t *size)
