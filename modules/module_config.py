@@ -69,7 +69,7 @@ BLE_BOND_OPTIONS_FORMAT = {
             'ID':  '{}'.format(x[15]+1),
             'type': {1: 'keyboard', 0: 'mouse'}.get(x[14], 'unknown'),
             'mac': ':'.join('{:02X}'.format(b) for b in x[0:6][::-1]),  
-            'hwid': ''.join('{:02X}'.format(b) for b in x[6:14][::-1])
+            'hwid': ''.join('{:02X}'.format(b) for b in x[6:14])
         },  
         None  
     ),
