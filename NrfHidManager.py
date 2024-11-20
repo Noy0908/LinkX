@@ -8,12 +8,18 @@ from NrfHidDevice import NrfHidDevice
 NORDIC_VID = 0x1915
 
 class NrfHidManager():
+    # TYPE2BOARDLIST = {
+    #     'gaming_mouse' : ['nrf52840gmouse', 'nrf54l15pdk', 'nrf54h20dk'],
+    #     'dongle' : ['nrf52840dongle', 'nrf52833dongle', 'nrf52820dongle', 'nrf5340dk', 'nrf52840dk'],
+    #     'keyboard' : ['nrf52kbd', 'nrf52833dk'],
+    #     'desktop_mouse' : ['nrf52dmouse', 'nrf52810dmouse'],
+    # }
     TYPE2BOARDLIST = {
-        'gaming_mouse' : ['nrf52840gmouse', 'nrf54l15pdk', 'nrf54h20dk'],
-        'dongle' : ['nrf52840dongle', 'nrf52833dongle', 'nrf52820dongle', 'nrf5340dk', 'nrf52840dk'],
-        'keyboard' : ['nrf52kbd', 'nrf52833dk'],
-        'desktop_mouse' : ['nrf52dmouse', 'nrf52810dmouse'],
-    }
+       'gaming_mouse' : ['nrf52840gmouse', 'nrf54h20dk'],
+       'dongle' : ['nrf52840dongle', 'nrf52833dongle', 'nrf52820dongle', 'nrf5340dk', 'nrf52833dk'],
+       'keyboard' : ['nrf52kbd', 'nrf54l15pdk'],
+       'desktop_mouse' : ['nrf52dmouse', 'nrf52810dmouse', 'nrf52840dk'],
+   }
 
     def __init__(self, vid=NORDIC_VID):
         self.devs = NrfHidDevice.open_devices(vid)
@@ -28,7 +34,7 @@ class NrfHidManager():
         else:
             if len(res) > 1:
                 print('{} is assigned to more than one type'.format(board_name))
-            return 'unknown'
+            return 'other'
 
     def list_devices(self):
         return ['Type: {} Board: {} (HW ID: {})'.format(NrfHidManager._get_dev_type(v.get_board_name()),
